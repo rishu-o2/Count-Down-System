@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        body {
+          font-family: 'Garamond', 'Times New Roman', Times, serif; 
+          text-align: center; 
+          margin: 50px; 
+          padding: 20px;
+          background-color: white; 
+          color: black; 
+          line-height: 1.6; 
+        }
+        #timer {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        button {
+            font-size: 20px;
+            margin: 5px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Countdown Timer</h1>
+    <div id="timer">00:00</div>
+    <input type="number" id="minutes" placeholder="Minutes" min="0">
+    <input type="number" id="seconds" placeholder="Seconds" min="0" max="59">
+    <br>
+    <button onclick="startCountdown()">Start</button>
+    <button onclick="pauseCountdown()">Pause</button>
+    <button onclick="resetCountdown()">Reset</button>
+
+    <!-- Audio element -->
+    <audio id="alarmSound" src="c:\Users\hp\Downloads\WhatsApp Audio 2024-12-03 at 9.52.13 PM.mpeg" preload="auto"></audio>
+
+    <script>
+        let countdown;
+        let timeRemaining = 0; 
+        let isPaused = false;
+
+        function startCountdown() {
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+
+            timeRemaining = minutes * 60 + seconds; 
+            isPaused = false;
+
+            clearInterval(countdown);
+            countdown = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(countdown);
+                    document.getElementById('alarmSound').play(); 
+                    alert("Time's up!");
+                } else if (!isPaused) {
+                    timeRemaining--;
+                    displayTime();
+                }
+            }, 1000);
+        }
+
+        function pauseCountdown() {
+            isPaused = true;
+        }
+
+        function resetCountdown() {
+            clearInterval(countdown);
+            timeRemaining = 0;
+            displayTime();
+            document.getElementById('minutes').value = '';
+            document.getElementById('seconds').value = '';
+        }
+
+        function displayTime() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timer').innerText = 
+                `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+    </script>
+</body>
+</html>

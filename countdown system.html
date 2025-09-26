@@ -1,86 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown Timer</title>
-    <style>
-        body {
-          font-family: 'Garamond', 'Times New Roman', Times, serif; 
-          text-align: center; 
-          margin: 50px; 
-          padding: 20px;
-          background-color: white; 
-          color: black; 
-          line-height: 1.6; 
-        }
-        #timer {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        button {
-            font-size: 20px;
-            margin: 5px;
-            padding: 10px 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clock Timer</title>
+  <style>
+    body {
+      font-family: 'Garamond', 'Times New Roman', Times, serif;
+      text-align: center;
+      margin: 50px;
+      padding: 20px;
+      background-color: white;
+      color: black;
+      line-height: 1.6;
+    }
+
+    #clockContainer {
+      width: 300px;
+      height: 300px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center,whitesmoke 60%, white 100%);
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #timer {
+      font-size: 32px;
+      font-weight: bold;
+      color: greyish black;
+      z-index: 2;
+    }
+
+    .hand {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+      border-radius: 2px;
+      z-index: 1;
+    }
+
+    .hour {
+      width: 6px;
+      height: 60px;
+      background-color: black;
+    }
+
+    .minute {
+      width: 4px;
+      height: 90px;
+      background-color: grey;
+    }
+
+    .second {
+      width: 2px;
+      height: 110px;
+      background-color: red;
+    }
+
+    button, select, input {
+      font-size: 18px;
+      margin: 5px;
+      padding: 8px 16px;
+    }
+
+    #inputFields {
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Countdown Timer</h1>
+  <h1>Countdown & Stopwatch</h1>
+
+  <select id="mode">
+    <option value="countdown">Countdown</option>
+    <option value="stopwatch">Stopwatch</option>
+  </select>
+
+  <div id="clockContainer">
     <div id="timer">00:00</div>
+    <div class="hand hour" id="hourHand"></div>
+    <div class="hand minute" id="minuteHand"></div>
+    <div class="hand second" id="secondHand"></div>
+  </div>
+
+  <div id="inputFields">
     <input type="number" id="minutes" placeholder="Minutes" min="0">
     <input type="number" id="seconds" placeholder="Seconds" min="0" max="59">
-    <br>
-    <button onclick="startCountdown()">Start</button>
-    <button onclick="pauseCountdown()">Pause</button>
-    <button onclick="resetCountdown()">Reset</button>
+  </div>
 
-    <!-- Audio element -->
-    <audio id="alarmSound" src="c:\Users\hp\Downloads\WhatsApp Audio 2024-12-03 at 9.52.13 PM.mpeg" preload="auto"></audio>
+  <button onclick="startTimer()">Start</button>
+  <button onclick="pauseTimer()">Pause</button>
+  <button onclick="resetTimer()">Reset</button>
 
-    <script>
-        let countdown;
-        let timeRemaining = 0; 
-        let isPaused = false;
+  <audio id="alarmSound" src="c:\Users\hp\Downloads\WhatsApp Audio 2024-12-03 at 9.52.13 PM.mpeg" preload="auto"></audio>
 
-        function startCountdown() {
-            const minutes = parseInt(document.getElementById('minutes').value) || 0;
-            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+  <script>
+    let countdown;
+    let timeElapsed = 0;
+    let timeRemaining = 0;
+    let isPaused = false;
+    let isRunning = false;
 
-            timeRemaining = minutes * 60 + seconds; 
-            isPaused = false;
+    const modeSelect = document.getElementById('mode');
+    const inputFields = document.getElementById('inputFields');
 
-            clearInterval(countdown);
-            countdown = setInterval(() => {
-                if (timeRemaining <= 0) {
-                    clearInterval(countdown);
-                    document.getElementById('alarmSound').play(); 
-                    alert("Time's up!");
-                } else if (!isPaused) {
-                    timeRemaining--;
-                    displayTime();
-                }
-            }, 1000);
-        }
+    modeSelect.addEventListener('change', () => {
+      inputFields.style.display = modeSelect.value === 'countdown' ? 'block' : 'none';
+      resetTimer();
+    });
 
-        function pauseCountdown() {
-            isPaused = true;
-        }
+    function startTimer() {
+      if (isRunning) return;
+      isPaused = false;
+      isRunning = true;
+      clearInterval(countdown);
 
-        function resetCountdown() {
-            clearInterval(countdown);
-            timeRemaining = 0;
-            displayTime();
-            document.getElementById('minutes').value = '';
-            document.getElementById('seconds').value = '';
-        }
+      if (modeSelect.value === 'countdown') {
+        const minutes = parseInt(document.getElementById('minutes').value) || 0;
+        const seconds = parseInt(document.getElementById('seconds').value) || 0;
+        timeRemaining = minutes * 60 + seconds;
 
-        function displayTime() {
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            document.getElementById('timer').innerText = 
-                `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-    </script>
+        countdown = setInterval(() => {
+          if (!isPaused) {
+            if (timeRemaining <= 0) {
+              clearInterval(countdown);
+              document.getElementById('alarmSound').play();
+              alert("Time's up!");
+              isRunning = false;
+            } else {
+              timeRemaining--;
+              displayTime(timeRemaining);
+              updateClockHands(timeRemaining);
+            }
+          }
+        }, 1000);
+      } else {
+        countdown = setInterval(() => {
+          if (!isPaused) {
+            timeElapsed++;
+            displayTime(timeElapsed);
+            updateClockHands(timeElapsed);
+          }
+        }, 1000);
+      }
+    }
+
+    function pauseTimer() {
+      isPaused = true;
+      isRunning = false;
+    }
+
+    function resetTimer() {
+      clearInterval(countdown);
+      isPaused = false;
+      isRunning = false;
+      timeElapsed = 0;
+      timeRemaining = 0;
+      displayTime(0);
+      updateClockHands(0);
+      document.getElementById('minutes').value = '';
+      document.getElementById('seconds').value = '';
+    }
+
+    function displayTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      document.getElementById('timer').innerText =
+        `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    function updateClockHands(totalSeconds) {
+      const seconds = totalSeconds % 60;
+      const minutes = Math.floor(totalSeconds / 60) % 60;
+      const hours = Math.floor(totalSeconds / 3600) % 12;
+
+      const secondDeg = seconds * 6;
+      const minuteDeg = minutes * 6 + seconds * 0.1;
+      const hourDeg = hours * 30 + minutes * 0.5;
+
+      document.getElementById('secondHand').style.transform = `rotate(${secondDeg}deg)`;
+      document.getElementById('minuteHand').style.transform = `rotate(${minuteDeg}deg)`;
+      document.getElementById('hourHand').style.transform = `rotate(${hourDeg}deg)`;
+    }
+  </script>
 </body>
 </html>
